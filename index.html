@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#007782">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Listing PH">
+<title>PH Listing Generator</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.33.0/tabler-icons.min.css">
+<link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<main class="app">
+  <header class="top">
+    <div class="brand">
+      <div class="mark">PH</div>
+      <div>
+        <h1>Listing Generator</h1>
+        <p>Vinted Titel & Beschreibungen schneller erstellen</p>
+      </div>
+    </div>
+    <button class="icon-btn" onclick="resetForm()" title="Zurücksetzen"><i class="ti ti-refresh"></i></button>
+  </header>
+
+  <section class="hero">
+    <div>
+      <span class="eyebrow">Heute vorbereiten</span>
+      <h2>Produkt auswählen, Text kopieren, bei Vinted einfügen.</h2>
+    </div>
+    <div class="hero-actions">
+      <div id="sync-status" class="sync-status warn">Firebase wird geprüft …</div>
+      <button class="btn btn-primary" onclick="generateListing(true)"><i class="ti ti-sparkles"></i> Neue Variante</button>
+    </div>
+  </section>
+
+  <section class="layout">
+    <div class="panel">
+      <div class="panel-title">Artikel</div>
+      <div class="field">
+        <label>Produkt</label>
+        <select id="product" onchange="onProductChange()"></select>
+      </div>
+      <div class="grid two">
+        <div class="field">
+          <label>Größe</label>
+          <select id="size">
+            <option value="">Wählen...</option>
+            <option>S</option>
+            <option>M</option>
+            <option>L</option>
+            <option>XL</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Farbe</label>
+          <input id="color" placeholder="z.B. navy, schwarz">
+        </div>
+      </div>
+      <div class="grid two">
+        <div class="field">
+          <label>Zustand</label>
+          <select id="condition">
+            <option>Neu und ungetragen</option>
+            <option>Sehr guter Zustand</option>
+            <option>Guter Zustand</option>
+            <option>Einmal getragen</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Stil</label>
+          <select id="style">
+            <option>clean</option>
+            <option>Stockholm Style</option>
+            <option>Old Money Style</option>
+            <option>sommerlich</option>
+            <option>streetwear</option>
+            <option>edel</option>
+            <option>casual</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label>Besonderheiten optional</label>
+        <input id="details" placeholder="z.B. Oversized Fit, weicher Stoff, limitiert">
+      </div>
+      <div class="field">
+        <label>Eigene Keywords optional</label>
+        <input id="keywords" placeholder="z.B. Urlaub, Monaco, Sommer Outfit">
+      </div>
+    </div>
+
+    <div class="panel output-panel">
+      <div class="panel-title">
+        Ergebnis
+        <span id="variant-label">Variante 1</span>
+      </div>
+      <div class="field">
+        <div class="label-row">
+          <label>Titel</label>
+          <button class="mini-btn" onclick="copyField('title')"><i class="ti ti-copy"></i> Kopieren</button>
+        </div>
+        <textarea id="title" rows="2"></textarea>
+      </div>
+      <div class="field">
+        <div class="label-row">
+          <label>Beschreibung</label>
+          <button class="mini-btn" onclick="copyField('description')"><i class="ti ti-copy"></i> Kopieren</button>
+        </div>
+        <textarea id="description" rows="12"></textarea>
+      </div>
+      <div class="actions">
+        <button class="btn btn-primary" onclick="copyAll()"><i class="ti ti-copy-check"></i> Alles kopieren</button>
+        <button class="btn" onclick="generateListing(true)"><i class="ti ti-refresh"></i> Andere Formulierung</button>
+      </div>
+      <div id="toast" class="toast" hidden></div>
+    </div>
+  </section>
+
+  <section class="panel templates">
+    <div class="panel-title">Mustertexte</div>
+    <p class="muted">Hier kannst du später deine eigenen Standardformulierungen speichern. Die App nutzt sie als Zusatzstil und mischt trotzdem Varianten.</p>
+    <div class="grid two">
+      <div class="field">
+        <label>Lieblingssatz Anfang</label>
+        <textarea id="template-start" rows="4" placeholder="Beispiel: Verkaufe ein sehr schönes Shirt aus meiner aktuellen Kollektion..."></textarea>
+      </div>
+      <div class="field">
+        <label>Lieblingssatz Ende</label>
+        <textarea id="template-end" rows="4" placeholder="Beispiel: Bei Fragen gerne schreiben, Versand erfolgt schnell und ordentlich..."></textarea>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn" onclick="saveTemplates()"><i class="ti ti-device-floppy"></i> Muster speichern</button>
+      <button class="btn" onclick="clearTemplates()"><i class="ti ti-eraser"></i> Leeren</button>
+    </div>
+  </section>
+
+  <section class="panel product-admin">
+    <div class="panel-title">Produkte verwalten</div>
+    <p class="muted">Hier kannst du Produktnamen, Farbe/Design, Keywords und Hashtags direkt anpassen. Änderungen bleiben lokal gespeichert.</p>
+    <div class="grid two">
+      <div class="field">
+        <label>Produkt auswählen</label>
+        <select id="admin-product" onchange="loadAdminProduct()"></select>
+      </div>
+      <div class="field">
+        <label>Typ</label>
+        <select id="admin-type">
+          <option>T-Shirt</option>
+          <option>Hose</option>
+          <option>Artikel</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label>Name</label>
+      <input id="admin-name" placeholder="Produktname">
+    </div>
+    <div class="field">
+      <label>Farbe / Design</label>
+      <input id="admin-color" placeholder="z.B. Weiß mit navyblauem Design">
+    </div>
+    <div class="grid two">
+      <div class="field">
+        <label>Keywords / Themen</label>
+        <input id="admin-theme" placeholder="Yacht Club, Monaco, Riviera">
+      </div>
+      <div class="field">
+        <label>Hashtags</label>
+        <input id="admin-tags" placeholder="#tshirt #yachtclub #sommeroutfit">
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn btn-primary" onclick="saveAdminProduct()"><i class="ti ti-device-floppy"></i> Produkt speichern</button>
+      <button class="btn" onclick="addAdminProduct()"><i class="ti ti-plus"></i> Neu hinzufügen</button>
+      <button class="btn danger" onclick="deleteAdminProduct()"><i class="ti ti-trash"></i> Löschen</button>
+      <button class="btn" onclick="resetProducts()"><i class="ti ti-restore"></i> Standardliste</button>
+    </div>
+  </section>
+</main>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+<script src="./app.js"></script>
+</body>
+</html>
