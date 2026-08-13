@@ -46,6 +46,7 @@ input:focus,select:focus,textarea:focus{border-color:rgba(0,119,130,.42);box-sha
 .btn{padding:10px 14px}.icon-btn{width:42px;height:42px}.mini-btn{font-size:12px;padding:6px 9px}
 .btn:hover,.icon-btn:hover,.mini-btn:hover{transform:translateY(-1px);box-shadow:var(--shadow-soft),inset 0 1px 0 rgba(255,255,255,.72)}
 .btn-primary{background:var(--accent);color:#fff;border-color:rgba(255,255,255,.3);box-shadow:0 12px 28px rgba(0,119,130,.22),inset 0 1px 0 rgba(255,255,255,.28)}
+.btn-vinted{background:#09B1BA;color:#fff;border-color:rgba(255,255,255,.3);box-shadow:0 12px 28px rgba(9,177,186,.22),inset 0 1px 0 rgba(255,255,255,.28);text-decoration:none}
 .danger{color:var(--red)}
 .actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.muted{color:var(--muted)}
 .templates,.product-admin,.photo-studio{margin-top:16px}

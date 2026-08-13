@@ -1,6 +1,7 @@
-const productListVersion='2026-06-24-tshirt-list-v2';
+const productListVersion='2026-08-13-v1';
 const defaultProducts=[
   {name:'Hose',type:'Hose',theme:['Sommerhose','blau weiß gestreift','Stockholm Style','Old Money Style'],tags:['#hose','#sommerhose','#oldmoneystyle','#stockholmstyle','#gestreift','#sommeroutfit']},
+  {name:'Monte Carlo Champagne Club T-Shirt - Weiß mit navyblauem Design',type:'T-Shirt',color:'Weiß mit navyblauem Design',theme:['Monte Carlo','Champagne Club','Monaco','Riviera','Old Money'],tags:['#tshirt','#montecarlo','#champagneclub','#maisonrivage','#oldmoney','#oldmoneystyle','#rivierastyle','#monacostyle','#heavycotton','#215gsm','#herrenmode','#preppystyle']},
   {name:'Yacht Club Saint Tropez - Weiß mit navyblauem Design',type:'T-Shirt',theme:['Yacht Club','Saint Tropez','Riviera','Sommer Look'],tags:['#tshirt','#yachtclub','#sainttropez','#rivierastyle','#sommeroutfit']},
   {name:'Yacht Club Saint Tropez - Navyblau mit weißem Design',type:'T-Shirt',theme:['Yacht Club','Saint Tropez','navy','maritim'],tags:['#tshirt','#yachtclub','#sainttropez','#navy','#maritim']},
   {name:'Yacht Club Monaco - Weiß mit navyblauem Design',type:'T-Shirt',theme:['Yacht Club','Monaco','Riviera','Old Money'],tags:['#tshirt','#yachtclub','#monaco','#oldmoneystyle','#rivierastyle']},
@@ -51,7 +52,7 @@ const hoseRequired={
 
 const hoseSizeData={
   S:{length:'ca. 100 cm',waist:'ca. 37 cm (sehr elastisch)',compare:'Ich bin 1,76 m groß und mir passt sie sehr gut'},
-  M:{length:'ca. 103 cm',waist:'ca. 38 cm (sehr elastisch)',compare:'Ich bin 1,80 m groß und mir passt sie sehr gut'},
+  M:{length:'ca. 102 cm',waist:'ca. 38 cm (sehr elastisch)',compare:'Ich bin 1,80 m groß und mir passt sie sehr gut'},
   L:{length:'ca. 104 cm',waist:'ca. 39 cm (sehr elastisch)',compare:'Ich bin 1,84 m groß und mir passt sie sehr gut'},
   XL:{length:'ca. 106 cm',waist:'ca. 40 cm (sehr elastisch)',compare:'Ich bin 1,88 m groß und mir passt sie sehr gut'}
 };
