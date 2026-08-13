@@ -325,24 +325,19 @@ function generateTshirtListing(p){
   const tIdx=variant%6;
   const title=titleVariants[tIdx%titleVariants.length];
   const tags=[...new Set([...p.tags,'#heavycotton','#215gsm','#oldmoneystyle','#stockholmstyle','#sommeroutfit','#herrenmode','#streetwear','#customshirt','#maisonrivage'])].join(' ');
+
+  // Erster Block: immer vollständig - Begrüßung + Ich verkaufe + Zustand + Fit in einem Absatz
   const greetings=['Hey 👋','Heyy 😊','Hey! 👋','Hi 😊'];
   const greeting=greetings[tIdx%greetings.length];
-  const introOptions=[
-    'Ich verkaufe dieses Maison Rivage '+shortName+' T-Shirt in Größe '+size+'.',
-    'Ich biete hier dieses Maison Rivage T-Shirt in Größe '+size+' an.',
-    'Verkauft wird dieses Maison Rivage '+shortName+' Shirt in Größe '+size+'.',
-    'Ich verkaufe hier ein Maison Rivage T-Shirt in Größe '+size+'.',
-    'Ich trenne mich von diesem Maison Rivage '+shortName+' T-Shirt in Größe '+size+'.',
-    'Zum Verkauf steht dieses Maison Rivage '+shortName+' T-Shirt in Größe '+size+'.'
+  const sellIntros=[
+    'Ich verkaufe hier dieses '+shortName+' T-Shirt in Größe '+size+'. Das T-Shirt ist in einem sehr guten Zustand und hat einen Regular Fit.',
+    'Ich biete hier dieses Maison Rivage '+shortName+' T-Shirt in Größe '+size+' an. Es ist in einem sehr guten Zustand und hat einen Regular bis leicht Slim Fit.',
+    'Zum Verkauf steht dieses '+shortName+' Shirt in Größe '+size+'. Der Zustand ist sehr gut - kaum getragen, Regular Fit.',
+    'Ich verkaufe dieses Maison Rivage '+shortName+' T-Shirt in Größe '+size+'. Das Shirt befindet sich in sehr gutem Zustand und hat einen Regular Fit.',
+    'Ich trenne mich von diesem '+shortName+' T-Shirt in Größe '+size+'. Es ist in einem sehr guten, kaum getragenen Zustand und hat einen Regular Fit.',
+    'Hier biete ich dieses Maison Rivage '+shortName+' T-Shirt in Größe '+size+' an. Zustand sehr gut, Regular Fit, kaum getragen.'
   ];
-  const conditionOptions=[
-    'Das T-Shirt ist in einem sehr guten Zustand und hat einen Regular Fit.',
-    'Es befindet sich in einem sehr guten Zustand - kaum getragen.',
-    'Zustand: sehr gut, kaum getragen.',
-    'Das Shirt ist in sehr gutem Zustand.',
-    'Sehr guter Zustand - es wurde kaum getragen.',
-    'Zustand ist sehr gut, das Shirt wurde kaum getragen.'
-  ];
+
   const detailBlock=[
     'Zum T-Shirt:',
     'Größe: '+size,
@@ -350,6 +345,7 @@ function generateTshirtListing(p){
     'Brustbreite: '+measure.width,
     'Material: 100 % Baumwolle',
     '215 GSM Heavy Cotton',
+    'Regular bis leichter Slim Fit',
     'Selbst bedruckt'
   ].join('\n');
   const shippingLines=[
@@ -366,8 +362,7 @@ function generateTshirtListing(p){
   const contact=contactLines[tIdx%contactLines.length];
   const lines=[
     greeting,'',
-    introOptions[tIdx%introOptions.length],
-    conditionOptions[tIdx%conditionOptions.length],'',
+    sellIntros[tIdx%sellIntros.length],'',
     detailBlock,'',
     shipping,
     contact,'',
@@ -452,21 +447,13 @@ function generateCapListing(p){
   const hashtags=capHashtags.join(' ');
   const greetings=['Hey 👋','Heyy 😊','Hey! 👋','Hi 😊'];
   const greeting=greetings[cIdx%greetings.length];
-  const introOptions=[
-    "Ich verkaufe dieses Maison Rivage Yacht Club Cap d'Antibes T-Shirt in Größe "+size+'.',
-    "Ich biete hier dieses Maison Rivage Cap d'Antibes T-Shirt in Größe "+size+' an.',
-    "Zum Verkauf steht dieses Maison Rivage Yacht Club Cap d'Antibes Shirt in Größe "+size+'.',
-    "Ich verkaufe hier ein Maison Rivage Cap d'Antibes T-Shirt in Größe "+size+'.',
-    "Ich trenne mich von diesem Maison Rivage Cap d'Antibes T-Shirt in Größe "+size+'.',
-    "Zum Verkauf steht dieses stilvolle Maison Rivage Yacht Club Shirt in Größe "+size+'.'
-  ];
-  const conditionOptions=[
-    'Das T-Shirt ist in einem sehr guten Zustand und hat einen Regular Fit.',
-    'Es befindet sich in einem sehr guten Zustand - kaum getragen.',
-    'Zustand: sehr gut, kaum getragen.',
-    'Das Shirt ist in sehr gutem Zustand.',
-    'Sehr guter Zustand - es wurde kaum getragen.',
-    'Zustand ist sehr gut, das Shirt wurde kaum getragen.'
+  const sellIntros=[
+    "Ich verkaufe hier dieses Maison Rivage Yacht Club Cap d'Antibes T-Shirt in Größe "+size+". Das T-Shirt ist in einem sehr guten Zustand und hat einen Regular Fit.",
+    "Ich biete hier dieses Maison Rivage Cap d'Antibes T-Shirt in Größe "+size+" an. Es ist in einem sehr guten Zustand und hat einen Regular bis leicht Slim Fit.",
+    "Zum Verkauf steht dieses Maison Rivage Yacht Club Cap d'Antibes Shirt in Größe "+size+". Der Zustand ist sehr gut - kaum getragen, Regular Fit.",
+    "Ich verkaufe dieses Maison Rivage Cap d'Antibes T-Shirt in Größe "+size+". Das Shirt befindet sich in sehr gutem Zustand und hat einen Regular Fit.",
+    "Ich trenne mich von diesem Maison Rivage Yacht Club Cap d'Antibes T-Shirt in Größe "+size+". Sehr guter, kaum getragener Zustand, Regular Fit.",
+    "Hier biete ich dieses Maison Rivage Cap d'Antibes T-Shirt in Größe "+size+" an. Zustand sehr gut, Regular Fit, kaum getragen."
   ];
   const detailBlock=[
     'Zum T-Shirt:',
@@ -476,6 +463,7 @@ function generateCapListing(p){
     'Farbe: '+tshirtColorForProduct(p.name),
     'Material: 100 % Baumwolle',
     '215 GSM Heavy Cotton',
+    'Regular bis leichter Slim Fit',
     'Selbst bedruckt'
   ].join('\n');
   const shippingLines=[
@@ -492,8 +480,7 @@ function generateCapListing(p){
   const contact=contactLines[cIdx%contactLines.length];
   const lines=[
     greeting,'',
-    introOptions[cIdx%introOptions.length],
-    conditionOptions[cIdx%conditionOptions.length],'',
+    sellIntros[cIdx%sellIntros.length],'',
     detailBlock,'',
     shipping,
     contact,'',
