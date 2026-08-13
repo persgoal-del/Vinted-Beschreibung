@@ -133,61 +133,6 @@
     </div>
   </section>
 
-  <section class="panel photo-studio">
-    <div class="panel-title">
-      Foto-Studio
-      <span>Parkettbild</span>
-    </div>
-    <div class="studio-grid">
-      <div class="studio-controls">
-        <div class="field">
-          <label>T-Shirt Bild</label>
-          <label class="upload-card" for="studio-upload">
-            <i class="ti ti-photo-up"></i>
-            <span>Bild auswählen</span>
-            <small>PNG mit transparentem Hintergrund wirkt am saubersten</small>
-          </label>
-          <input id="studio-upload" class="file-input" type="file" accept="image/*" onchange="handleStudioUpload(event)">
-        </div>
-        <div class="grid two">
-          <div class="field">
-            <label>Parkett</label>
-            <div class="auto-card">
-              <i class="ti ti-wand"></i>
-              <span>Automatisch</span>
-              <small id="studio-bg-label">Realistische Eiche</small>
-            </div>
-          </div>
-          <div class="field">
-            <label>Format</label>
-            <select id="studio-format" onchange="renderStudio()">
-              <option value="square">Quadratisch</option>
-              <option value="portrait">Hochformat</option>
-            </select>
-          </div>
-        </div>
-        <div class="field range-field">
-          <label>Größe</label>
-          <input id="studio-scale" type="range" min="35" max="96" value="74" oninput="renderStudio()">
-        </div>
-        <div class="field range-field">
-          <label>Position</label>
-          <input id="studio-y" type="range" min="-120" max="140" value="0" oninput="renderStudio()">
-        </div>
-        <div class="field range-field">
-          <label>Drehung</label>
-          <input id="studio-rotate" type="range" min="-8" max="8" value="0" oninput="renderStudio()">
-        </div>
-        <div class="actions">
-          <button class="btn btn-primary" onclick="downloadStudioImage()"><i class="ti ti-download"></i> In Fotos sichern</button>
-          <button class="btn" onclick="randomizeStudio()"><i class="ti ti-wand"></i> Neu gestalten</button>
-        </div>
-      </div>
-      <div class="studio-canvas-wrap">
-        <canvas id="studio-canvas" width="1080" height="1080"></canvas>
-      </div>
-    </div>
-  </section>
 
   <section class="panel product-admin">
     <div class="panel-title">Produkte verwalten</div>

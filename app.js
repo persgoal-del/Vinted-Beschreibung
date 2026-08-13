@@ -63,12 +63,12 @@ const tshirtSizeData={
 };
 
 const hoseOpeners=[
-  'Heyy 😊 Ich verkaufe diese blau-weiß gestreifte Sommerhose',
-  'Hey! 👋 Zum Verkauf steht diese schöne blau-weiß gestreifte Herren-Sommerhose',
-  'Ich verkaufe diese blau-weiß gestreifte Herren-Sommerhose',
-  'Heyy 😊 Angeboten wird diese lässige blau-weiß gestreifte Sommerhose',
-  'Hey 👋 Ich trenne mich von dieser blau-weiß gestreiften Sommerhose',
-  'Zum Verkauf steht diese blau-weiß gestreifte Sommerhose im Baggy Fit'
+  'Ich verkaufe diese blau-weiß gestreifte Sommerhose',
+  'Zum Verkauf steht diese blau-weiß gestreifte Herren-Sommerhose',
+  'Ich trenne mich von dieser blau-weiß gestreiften Sommerhose',
+  'Ich biete diese blau-weiß gestreifte Sommerhose an',
+  'Zum Verkauf steht diese lässige blau-weiß gestreifte Sommerhose',
+  'Ich verkaufe hier diese blau-weiß gestreifte Herren-Sommerhose'
 ];
 
 const hoseConditionLines=[
@@ -81,12 +81,12 @@ const hoseConditionLines=[
 ];
 
 const hoseSummerLines=[
-  'Die Hose hat einen schönen Baggy Fit und ist perfekt luftig. 🌊',
+  'Die Hose hat einen schönen Baggy Fit und ist perfekt luftig.',
   'Der Stoff fällt leicht und dünn aus, was sie perfekt für warme Sommertage macht.',
   'Der leichte und dünne Stoff macht sie ideal für Sommer, Urlaub und warme Tage.',
   'Sie trägt sich angenehm luftig - der Stoff ist sehr leicht und dünn.',
   'Durch den dünnen Stoff und den Baggy Fit eignet sie sich perfekt für warme Sommertage.',
-  'Perfekt luftig durch den lockeren Baggy Fit und den leichten Stoff - ideal für den Sommer.'
+  'Perfekt luftig durch den lockeren Baggy Fit und den leichten Stoff.'
 ];
 
 const hoseStyleLines=[
@@ -153,22 +153,6 @@ const capHashtags=[
 ];
 
 let variant=1;
-let studioImage=null;
-let studioSeed=Math.floor(Date.now()%10000);
-const studioStyles=['realistic-oak','realistic-light','realistic-walnut','realistic-ash'];
-const studioStyleNames={
-  'realistic-oak':'Realistische Eiche',
-  'realistic-light':'Helle Eiche',
-  'realistic-walnut':'Warmer Nussbaum',
-  'realistic-ash':'Neutrale Esche'
-};
-const parquetTexture=new Image();
-let parquetTextureReady=false;
-parquetTexture.onload=()=>{
-  parquetTextureReady=true;
-  renderStudio();
-};
-parquetTexture.src='./assets/realistic-oak-parquet.png';
 
 function pick(arr){return arr[Math.floor(Math.random()*arr.length)]}
 function article(type){return ['Armband','Bundle','Artikel'].includes(type)?'ein':'ein schönes'}
@@ -328,6 +312,7 @@ function generateTshirtListing(p){
   const measure=tshirtSizeData[size]||tshirtSizeData.L;
   const color=productColor(p)||p.color||'Weiß';
   const titleName=cleanTshirtTitleName(p.name);
+  const shortName=titleName.replace(/^Maison Rivage\s+/,'');
   const titleVariants=[
     `${titleName} T-Shirt | Größe ${size} | Heavy Cotton | Old Money Style`,
     `${titleName} T-Shirt | Gr. ${size} | 215 GSM | Stockholm Style`,
@@ -339,47 +324,57 @@ function generateTshirtListing(p){
   const tIdx=variant%6;
   const title=titleVariants[tIdx%titleVariants.length];
   const tags=[...new Set([...p.tags,'#heavycotton','#215gsm','#oldmoneystyle','#stockholmstyle','#sommeroutfit','#herrenmode','#streetwear','#customshirt','#maisonrivage'])].join(' ');
-  const shortName=cleanTshirtTitleName(p.name).replace(/^Maison Rivage\s+/,'');
+  const greetings=['Hey 👋','Heyy 😊','Hey! 👋','Hi 😊'];
+  const greeting=greetings[tIdx%greetings.length];
   const introOptions=[
-    `Hey 👋 Ich verkaufe dieses Maison Rivage ${shortName} T-Shirt in Größe ${size}.`,
-    `Ich biete hier dieses Maison Rivage T-Shirt in Größe ${size} an.`,
-    `Hey! 😊 Verkauft wird dieses Maison Rivage ${shortName} Shirt in Größe ${size}.`,
-    `Ich verkaufe hier ein Maison Rivage T-Shirt in Größe ${size}.`,
-    `Hey 👋 Ich trenne mich von diesem Maison Rivage ${shortName} T-Shirt in Größe ${size}.`,
-    `Heyy 😊 Zum Verkauf steht dieses Maison Rivage ${shortName} T-Shirt in Größe ${size}.`
+    'Ich verkaufe dieses Maison Rivage '+shortName+' T-Shirt in Größe '+size+'.',
+    'Ich biete hier dieses Maison Rivage T-Shirt in Größe '+size+' an.',
+    'Verkauft wird dieses Maison Rivage '+shortName+' Shirt in Größe '+size+'.',
+    'Ich verkaufe hier ein Maison Rivage T-Shirt in Größe '+size+'.',
+    'Ich trenne mich von diesem Maison Rivage '+shortName+' T-Shirt in Größe '+size+'.',
+    'Zum Verkauf steht dieses Maison Rivage '+shortName+' T-Shirt in Größe '+size+'.'
   ];
-  const lookOptions=[
-    'Das Shirt hat einen cleanen, sommerlichen Look und passt sehr gut zu Chinos, Shorts oder einer leichten Sommerhose.',
-    'Der Look wirkt hochwertig, maritim und lässt sich sehr gut im Sommer kombinieren.',
-    'Vom Stil her passt es perfekt zu Riviera, Old Money Style, Streetwear oder einem cleanen Casual-Outfit.',
-    'Es ist ideal für warme Tage und lässt sich einfach mit Shorts, Jeans oder Sommerhose tragen.',
-    'Kombinieren kann man es super mit Chinos, hellen Shorts oder einer lockeren Sommerhose.',
-    'Perfekt für den Stockholm Style oder Old Money Look - kombiniert sich easy zu fast allem.'
+  const conditionOptions=[
+    'Das T-Shirt ist in einem sehr guten Zustand und hat einen Regular Fit.',
+    'Es befindet sich in einem sehr guten Zustand - kaum getragen.',
+    'Zustand: sehr gut, kaum getragen.',
+    'Das Shirt ist in sehr gutem Zustand.',
+    'Sehr guter Zustand - es wurde kaum getragen.',
+    'Zustand ist sehr gut, das Shirt wurde kaum getragen.'
   ];
-  const materialLine='Material: 100 % Baumwolle, 215 GSM Heavy Cotton - angenehm schwer und hochwertig im Griff.';
-  const details=[
-    `- Größe: ${size}`,
-    `- Länge: ${measure.length}`,
-    `- Breite: ${measure.width}`,
-    `- Farbe / Design: ${color}`,
-    '- Marke: Maison Rivage',
-    '- Material: 100 % Baumwolle',
-    '- 215 GSM Heavy Cotton',
-    '- Selbst bedruckt'
+  const detailBlock=[
+    'Zum T-Shirt:',
+    'Größe: '+size,
+    'Länge: '+measure.length,
+    'Brustbreite: '+measure.width,
+    'Material: 100 % Baumwolle',
+    '215 GSM Heavy Cotton',
+    'Selbst bedruckt'
   ].join('\n');
-  const shipping='📦 Versand möglich - in der Regel innerhalb von 24 Stunden.';
-  const contact='Bei Fragen oder Interesse einfach melden, ich antworte schnell! 😊';
-  const layouts=[
-    [introOptions[tIdx%introOptions.length],'',`Zum T-Shirt:`,`Größe: ${size}`,`Länge: ${measure.length}`,`Breite: ${measure.width}`,'Material: 100 % Baumwolle','215 GSM Heavy Cotton','Regular Fit','Selbst bedruckt','',lookOptions[tIdx%lookOptions.length],'',`📦 ${shipping}`,`Bei Fragen oder Interesse gerne melden 😊`,'',tags],
-    [introOptions[tIdx%introOptions.length],lookOptions[tIdx%lookOptions.length],'',`Farbe / Design: ${color}.`,materialLine,'Marke: Maison Rivage.','Selbst bedruckt.','','Details:',details,'',shipping,'',contact,'',tags],
-    [introOptions[tIdx%introOptions.length],'',`Die wichtigsten Details:`,`Größe ${size} | Länge ${measure.length} | Breite ${measure.width}`,`${color} | ${capRequired.material} | 215 GSM Heavy Cotton`,'Selbst bedruckt','',lookOptions[tIdx%lookOptions.length],'',`📦 ${shipping} ${contact}`,'',tags],
-    [introOptions[tIdx%introOptions.length],lookOptions[tIdx%lookOptions.length],'','Maße & Material:','Marke: Maison Rivage',`Größe: ${size}`,`Länge: ${measure.length}`,`Breite: ${measure.width}`,`Farbe / Design: ${color}`,'100 % Baumwolle','215 GSM Heavy Cotton','Selbst bedruckt','',`📦 ${shipping}`,'',contact,'',tags],
-    [`${introOptions[tIdx%introOptions.length]} ${lookOptions[tIdx%lookOptions.length]}`,'',`Details: Maison Rivage, Größe ${size}, Länge ${measure.length}, Breite ${measure.width}, ${color}.`,`${materialLine} Das Shirt ist selbst bedruckt.`,'',`📦 ${shipping}`,'',contact,'',tags],
-    [introOptions[tIdx%introOptions.length],'',lookOptions[tIdx%lookOptions.length],'',`Zum Shirt: Größe ${size}, Länge ${measure.length}, Breite ${measure.width}.`,`Farbe / Design: ${color}.`,materialLine,'Selbst bedruckt.','',`📦 ${shipping} ${contact}`,'',tags]
+  const shippingLines=[
+    '📦 Versand in der Regel innerhalb von 24 Stunden.',
+    '📦 Der Versand erfolgt meist innerhalb von 24 Stunden.',
+    '📦 Ich versende schnell und ordentlich verpackt - meist innerhalb von 24h.'
+  ];
+  const shipping=shippingLines[tIdx%shippingLines.length];
+  const contactLines=[
+    'Bei Fragen oder Interesse gerne melden 😊',
+    'Bei Interesse oder Fragen einfach schreiben 😊',
+    'Schreibt mich gerne bei Fragen an 😊'
+  ];
+  const contact=contactLines[tIdx%contactLines.length];
+  const lines=[
+    greeting,'',
+    introOptions[tIdx%introOptions.length],
+    conditionOptions[tIdx%conditionOptions.length],'',
+    detailBlock,'',
+    shipping,
+    contact,'',
+    tags
   ];
   byId('title').value=title;
-  byId('description').value=layouts[tIdx%layouts.length].join('\n').replace(/\n{3,}/g,'\n\n').trim();
-  byId('variant-label').textContent=`T-Shirt Variante ${variant}`;
+  byId('description').value=lines.join('\n').replace(/\n{3,}/g,'\n\n').trim();
+  byId('variant-label').textContent='T-Shirt Variante '+variant;
 }
 
 function generateHoseListing(p){
@@ -396,92 +391,48 @@ function generateHoseListing(p){
   const title=titleVariants[variant%titleVariants.length];
   const hashtags=hoseHashtags.join(' ');
   const vIdx=variant%6;
-  const intro=`${hoseOpeners[vIdx%hoseOpeners.length]} in Größe ${size}. ${hoseConditionLines[vIdx%hoseConditionLines.length]}`;
-  const summerLine=hoseSummerLines[vIdx%hoseSummerLines.length];
-  const styleLine=hoseStyleLines[vIdx%hoseStyleLines.length];
+  const greetings=['Heyy 😊','Hey! 👋','Hi 😊','Hey 👋'];
+  const greeting=greetings[vIdx%greetings.length];
+  const sellLine=hoseOpeners[vIdx%hoseOpeners.length]+' in Größe '+size+'.';
+  const conditionLine=hoseConditionLines[vIdx%hoseConditionLines.length];
+  const styleNote=hoseSummerLines[vIdx%hoseSummerLines.length]+' '+hoseStyleLines[vIdx%hoseStyleLines.length];
   const fitpic=hoseFitpicLines[vIdx%hoseFitpicLines.length];
   const measureBlock=[
-    `* Größe: ${size}`,
-    `* Länge: ${measure.length}`,
-    `* Bundweite: ${measure.waist}`,
-    `* Baggy Fit`
+    '* Größe: '+size,
+    '* Länge: '+measure.length,
+    '* Bundweite: '+measure.waist,
+    '* Baggy Fit',
+    'Zum Vergleich: '+measure.compare+'.'
   ].join('\n');
-  const compareNote=`Zum Vergleich: ${measure.compare}.`;
-  const linkBlock=`Gekauft wurde sie hier: ${hoseRequired.website}`;
-  const shipping='📦 Der Versand erfolgt meist innerhalb von 24 Stunden.';
-  const contact='Bei Fragen oder Interesse gerne schreiben 😊';
-  const layouts=[
-    [
-      intro,'',
-      summerLine,'',
-      measureBlock,'',
-      compareNote,'',
-      fitpic,'',
-      linkBlock,'',
-      shipping,'',
-      hashtags
-    ],
-    [
-      intro,'',
-      `${summerLine} ${styleLine}`,'',
-      measureBlock,'',
-      compareNote,'',
-      fitpic,'',
-      linkBlock,'',
-      `${shipping} ${contact}`,'',
-      hashtags
-    ],
-    [
-      intro,'',
-      styleLine,'',
-      summerLine,'',
-      '',
-      measureBlock,'',
-      compareNote,'',
-      fitpic,'',
-      linkBlock,'',
-      shipping,
-      contact,'',
-      hashtags
-    ],
-    [
-      intro,'',
-      `${summerLine} ${styleLine}`,'',
-      `Maße: Größe ${size}, Länge ${measure.length}, Bundweite ${measure.waist} (Baggy Fit).`,
-      compareNote,'',
-      fitpic,'',
-      linkBlock,'',
-      shipping,'',
-      contact,'',
-      hashtags
-    ],
-    [
-      intro,'',
-      summerLine,
-      styleLine,'',
-      measureBlock,'',
-      compareNote,'',
-      fitpic,'',
-      linkBlock,'',
-      shipping,'',
-      hashtags
-    ],
-    [
-      intro,'',
-      `${styleLine} ${summerLine}`,'',
-      '',
-      measureBlock,'',
-      compareNote,'',
-      fitpic,'',
-      linkBlock,'',
-      `${shipping} ${contact}`,'',
-      hashtags
-    ]
+  const linkBlock='Gekauft wurde sie hier: '+hoseRequired.website;
+  const shippingLines=[
+    '📦 Der Versand erfolgt meist innerhalb von 24 Stunden.',
+    '📦 Versand in der Regel innerhalb von 24 Stunden.',
+    '📦 Ich versende schnell und ordentlich verpackt - meist innerhalb von 24h.'
   ];
-  const text=layouts[vIdx%layouts.length].join('\n').replace(/\n{3,}/g,'\n\n').trim();
+  const shipping=shippingLines[vIdx%shippingLines.length];
+  const contactLines=[
+    'Bei Fragen oder Interesse gerne schreiben 😊',
+    'Bei Interesse oder Fragen einfach melden 😊',
+    'Schreibt mich gerne bei Fragen an 😊'
+  ];
+  const contact=contactLines[vIdx%contactLines.length];
+  const lines=[
+    greeting,'',
+    sellLine,
+    conditionLine,
+    styleNote,'',
+    fitpic,'',
+    measureBlock,'',
+    linkBlock,'',
+    shipping,
+    contact,'',
+    hashtags
+  ];
+  const text=lines.join('\n').replace(/\n{3,}/g,'\n\n').trim();
   byId('title').value=title;
   byId('description').value=text;
-  byId('variant-label').textContent=`Hose Variante ${variant}`;
+  byId('variant-label').textContent='Hose Variante '+variant;
 }
 
 function generateCapListing(p){
@@ -498,87 +449,58 @@ function generateCapListing(p){
   const cIdx=variant%6;
   const title=titleVariants[cIdx%titleVariants.length];
   const hashtags=capHashtags.join(' ');
-  const intro=`${capOpeners[cIdx%capOpeners.length]} - perfekt für den Sommer, sowohl vom Fit als auch vom Look her.`;
-  const styleLine=`${capLookLines[cIdx%capLookLines.length]} ${capFitLines[cIdx%capFitLines.length]}`;
+  const greetings=['Hey 👋','Heyy 😊','Hey! 👋','Hi 😊'];
+  const greeting=greetings[cIdx%greetings.length];
+  const introOptions=[
+    "Ich verkaufe dieses Maison Rivage Yacht Club Cap d'Antibes T-Shirt in Größe "+size+'.',
+    "Ich biete hier dieses Maison Rivage Cap d'Antibes T-Shirt in Größe "+size+' an.',
+    "Zum Verkauf steht dieses Maison Rivage Yacht Club Cap d'Antibes Shirt in Größe "+size+'.',
+    "Ich verkaufe hier ein Maison Rivage Cap d'Antibes T-Shirt in Größe "+size+'.',
+    "Ich trenne mich von diesem Maison Rivage Cap d'Antibes T-Shirt in Größe "+size+'.',
+    "Zum Verkauf steht dieses stilvolle Maison Rivage Yacht Club Shirt in Größe "+size+'.'
+  ];
+  const conditionOptions=[
+    'Das T-Shirt ist in einem sehr guten Zustand und hat einen Regular Fit.',
+    'Es befindet sich in einem sehr guten Zustand - kaum getragen.',
+    'Zustand: sehr gut, kaum getragen.',
+    'Das Shirt ist in sehr gutem Zustand.',
+    'Sehr guter Zustand - es wurde kaum getragen.',
+    'Zustand ist sehr gut, das Shirt wurde kaum getragen.'
+  ];
   const detailBlock=[
-    `- Größe: ${size}`,
-    `- Länge: ${measure.length}`,
-    `- Breite: ${measure.width}`,
-    `- Farbe: ${tshirtColorForProduct(p.name)}`,
-    `- Material: ${capRequired.material}`,
-    `- ${capRequired.weight} - angenehm schwer und hochwertig im Griff`,
-    `- ${capRequired.print}`
+    'Zum T-Shirt:',
+    'Größe: '+size,
+    'Länge: '+measure.length,
+    'Brustbreite: '+measure.width,
+    'Farbe: '+tshirtColorForProduct(p.name),
+    'Material: 100 % Baumwolle',
+    '215 GSM Heavy Cotton',
+    'Selbst bedruckt'
   ].join('\n');
-  const shipping='📦 Versand möglich - in der Regel innerhalb von 24 Stunden.';
-  const contact='Bei Fragen oder Interesse einfach melden, ich antworte schnell! 😊';
-  const layouts=[
-    [
-      intro,'',
-      styleLine,'',
-      'Details:',
-      detailBlock,'',
-      `📦 ${shipping}`,'',
-      contact,'',
-      hashtags
-    ],
-    [
-      intro,'',
-      'Die wichtigsten Details:',
-      `Größe ${size} | Länge ${measure.length} | Breite ${measure.width}`,
-      `${capRequired.color}, ${capRequired.material}, ${capRequired.weight}`,
-      capRequired.print,'',
-      styleLine,'',
-      `📦 ${shipping} ${contact}`,'',
-      hashtags
-    ],
-    [
-      `${intro} ${styleLine}`,'',
-      'Maße & Material:',
-      `Größe: ${size}`,
-      `Länge: ${measure.length}`,
-      `Breite: ${measure.width}`,
-      `Farbe: ${tshirtColorForProduct(p.name)}`,
-      `Material: ${capRequired.material}`,
-      `${capRequired.weight} - angenehm schwer und hochwertig im Griff`,
-      capRequired.print,'',
-      `📦 ${shipping}`,
-      contact,'',
-      hashtags
-    ],
-    [
-      `Verkaufe ein weißes Maison Rivage Shirt in Größe ${size} mit Cap d'Antibes / Yacht Club Design.`,'',
-      styleLine,
-      `Der Stoff besteht aus ${capRequired.material}; mit ${capRequired.weight} fühlt sich das Shirt angenehm schwer und hochwertig an.`,'',
-      `Details: Größe ${size}, Länge ${measure.length}, Breite ${measure.width}, Farbe ${tshirtColorForProduct(p.name)}, ${capRequired.print}.`,'',
-      `📦 ${shipping}`,'',
-      contact,'',
-      hashtags
-    ],
-    [
-      intro,'',
-      `Zum Shirt:`,
-      `Größe: ${size}`,
-      `Länge: ${measure.length}`,
-      `Breite: ${measure.width}`,
-      `Farbe: ${tshirtColorForProduct(p.name)}`,
-      '100 % Baumwolle | 215 GSM Heavy Cotton',
-      capRequired.print,'',
-      styleLine,'',
-      `📦 ${shipping} ${contact}`,'',
-      hashtags
-    ],
-    [
-      `${intro} ${styleLine}`,'',
-      `Details: Maison Rivage, Größe ${size}, Länge ${measure.length}, Breite ${measure.width}.`,
-      `Farbe: ${tshirtColorForProduct(p.name)}. ${capRequired.material}, ${capRequired.weight}. ${capRequired.print}.`,'',
-      `📦 ${shipping}`,'',
-      contact,'',
-      hashtags
-    ]
+  const shippingLines=[
+    '📦 Versand in der Regel innerhalb von 24 Stunden.',
+    '📦 Der Versand erfolgt meist innerhalb von 24 Stunden.',
+    '📦 Ich versende schnell und ordentlich verpackt - meist innerhalb von 24h.'
+  ];
+  const shipping=shippingLines[cIdx%shippingLines.length];
+  const contactLines=[
+    'Bei Fragen oder Interesse gerne melden 😊',
+    'Bei Interesse oder Fragen einfach schreiben 😊',
+    'Schreibt mich gerne bei Fragen an 😊'
+  ];
+  const contact=contactLines[cIdx%contactLines.length];
+  const lines=[
+    greeting,'',
+    introOptions[cIdx%introOptions.length],
+    conditionOptions[cIdx%conditionOptions.length],'',
+    detailBlock,'',
+    shipping,
+    contact,'',
+    hashtags
   ];
   byId('title').value=title;
-  byId('description').value=layouts[cIdx%layouts.length].join('\n').replace(/\n{3,}/g,'\n\n').trim();
-  byId('variant-label').textContent=`T-Shirt Variante ${variant}`;
+  byId('description').value=lines.join('\n').replace(/\n{3,}/g,'\n\n').trim();
+  byId('variant-label').textContent='T-Shirt Variante '+variant;
 }
 
 async function copyText(text){
@@ -696,271 +618,6 @@ function resetProducts(){
   toast('Standardliste wiederhergestellt');
 }
 
-function seededNoise(seed){
-  const x=Math.sin(seed*12.9898)*43758.5453;
-  return x-Math.floor(x);
-}
-
-function woodPalette(style){
-  const palettes={
-    oak:{base:'#d8bb8a',light:'#edd6a8',dark:'#a97842',line:'rgba(94,58,28,.25)'},
-    walnut:{base:'#a46b3f',light:'#c7925d',dark:'#694123',line:'rgba(54,31,15,.32)'},
-    ash:{base:'#c7b9a2',light:'#e2d7c5',dark:'#8d806c',line:'rgba(70,63,53,.24)'}
-  };
-  return palettes[style]||palettes.oak;
-}
-
-function shadeWood(hex,amount){
-  const n=parseInt(hex.slice(1),16);
-  const r=Math.max(0,Math.min(255,((n>>16)&255)+amount*255));
-  const g=Math.max(0,Math.min(255,((n>>8)&255)+amount*255));
-  const b=Math.max(0,Math.min(255,(n&255)+amount*255));
-  return `rgb(${Math.round(r)},${Math.round(g)},${Math.round(b)})`;
-}
-
-function currentStudioStyle(){
-  return studioStyles[Math.abs(studioSeed)%studioStyles.length];
-}
-
-function updateStudioLabel(style=currentStudioStyle()){
-  const label=byId('studio-bg-label');
-  if(label)label.textContent=studioStyleNames[style]||'Automatisch';
-}
-
-function drawParquet(ctx,w,h,style='realistic-oak'){
-  if(style.startsWith('realistic')&&parquetTextureReady){
-    ctx.save();
-    ctx.filter=realisticFloorFilter(style);
-    drawImageCover(ctx,parquetTexture,0,0,w,h,studioSeed);
-    ctx.restore();
-    polishRealisticFloor(ctx,w,h,style);
-    return;
-  }
-
-  const p=woodPalette(style);
-  const bg=ctx.createLinearGradient(0,0,w,h);
-  bg.addColorStop(0,p.light);
-  bg.addColorStop(.45,p.base);
-  bg.addColorStop(1,p.dark);
-  ctx.fillStyle=bg;
-  ctx.fillRect(0,0,w,h);
-
-  const plankH=Math.max(118,Math.round(h/9));
-  const plankW=Math.max(310,Math.round(w/3.25));
-  ctx.lineWidth=3;
-  for(let y=-plankH;y<h+plankH;y+=plankH){
-    const row=Math.floor((y+plankH)/plankH);
-    const offset=row%2?-plankW/2:0;
-    for(let x=-plankW;x<w+plankW;x+=plankW){
-      const nx=x+offset;
-      const noise=seededNoise((nx+31)*.017+(y+studioSeed)*.011);
-      const grad=ctx.createLinearGradient(nx,y,nx+plankW,y+plankH);
-      grad.addColorStop(0,shadeWood(p.light,noise*.08));
-      grad.addColorStop(.52,shadeWood(p.base,noise*.14-.04));
-      grad.addColorStop(1,shadeWood(p.dark,noise*.08));
-      ctx.fillStyle=grad;
-      ctx.fillRect(nx,y,plankW,plankH);
-      ctx.strokeStyle=p.line;
-      ctx.strokeRect(nx,y,plankW,plankH);
-
-      ctx.save();
-      ctx.beginPath();
-      ctx.rect(nx+10,y+10,plankW-20,plankH-20);
-      ctx.clip();
-      for(let i=0;i<9;i++){
-        const yy=y+18+i*(plankH/9)+seededNoise(nx+y+i+studioSeed)*9;
-        ctx.beginPath();
-        ctx.moveTo(nx+14,yy);
-        ctx.bezierCurveTo(nx+plankW*.35,yy-12,nx+plankW*.62,yy+14,nx+plankW-14,yy-4);
-        ctx.strokeStyle=`rgba(88,54,28,${.09+noise*.06})`;
-        ctx.lineWidth=1.2;
-        ctx.stroke();
-      }
-      ctx.restore();
-    }
-  }
-
-  const gloss=ctx.createRadialGradient(w*.34,h*.08,20,w*.34,h*.08,w*.82);
-  gloss.addColorStop(0,'rgba(255,255,255,.28)');
-  gloss.addColorStop(.58,'rgba(255,255,255,.08)');
-  gloss.addColorStop(1,'rgba(255,255,255,0)');
-  ctx.fillStyle=gloss;
-  ctx.fillRect(0,0,w,h);
-}
-
-function drawImageCover(ctx,img,x,y,w,h,seed=0){
-  const scale=Math.max(w/img.width,h/img.height);
-  const sw=w/scale;
-  const sh=h/scale;
-  const maxX=Math.max(0,img.width-sw);
-  const maxY=Math.max(0,img.height-sh);
-  const sx=maxX*(.28+seededNoise(seed+19)*.44);
-  const sy=maxY*(.34+seededNoise(seed+37)*.32);
-  ctx.drawImage(img,sx,sy,sw,sh,x,y,w,h);
-}
-
-function realisticFloorFilter(style){
-  const filters={
-    'realistic-oak':'saturate(1.06) contrast(1.04) brightness(1.02)',
-    'realistic-light':'saturate(.96) contrast(1.02) brightness(1.14)',
-    'realistic-walnut':'sepia(.28) saturate(1.22) contrast(1.08) brightness(.9)',
-    'realistic-ash':'saturate(.64) contrast(1.06) brightness(1.04)'
-  };
-  return filters[style]||filters['realistic-oak'];
-}
-
-function polishRealisticFloor(ctx,w,h,style='realistic-oak'){
-  const overlays={
-    'realistic-oak':['rgba(255,232,190,.18)','rgba(141,83,30,.12)','rgba(76,48,22,.18)'],
-    'realistic-light':['rgba(255,246,222,.24)','rgba(196,142,75,.08)','rgba(84,58,33,.13)'],
-    'realistic-walnut':['rgba(174,100,45,.16)','rgba(75,38,16,.22)','rgba(42,24,12,.25)'],
-    'realistic-ash':['rgba(226,222,214,.22)','rgba(110,103,91,.12)','rgba(56,52,46,.17)']
-  };
-  const tone=overlays[style]||overlays['realistic-oak'];
-  const warmth=ctx.createLinearGradient(0,0,w,h);
-  warmth.addColorStop(0,tone[0]);
-  warmth.addColorStop(.55,'rgba(255,255,255,.02)');
-  warmth.addColorStop(1,tone[1]);
-  ctx.fillStyle=warmth;
-  ctx.fillRect(0,0,w,h);
-
-  const vignette=ctx.createRadialGradient(w*.5,h*.44,w*.18,w*.5,h*.44,w*.76);
-  vignette.addColorStop(0,'rgba(255,255,255,.08)');
-  vignette.addColorStop(.58,'rgba(255,255,255,0)');
-  vignette.addColorStop(1,tone[2]);
-  ctx.fillStyle=vignette;
-  ctx.fillRect(0,0,w,h);
-}
-
-function handleStudioUpload(event){
-  const file=event.target.files?.[0];
-  if(!file)return;
-  const reader=new FileReader();
-  reader.onload=()=>{
-    const img=new Image();
-    img.onload=()=>{
-      studioImage=img;
-      renderStudio();
-      toast('Bild geladen');
-    };
-    img.src=reader.result;
-  };
-  reader.readAsDataURL(file);
-}
-
-function renderStudio(){
-  const canvas=byId('studio-canvas');
-  if(!canvas)return;
-  const format=byId('studio-format')?.value||'square';
-  canvas.width=1080;
-  canvas.height=format==='portrait'?1350:1080;
-  const ctx=canvas.getContext('2d');
-  const w=canvas.width;
-  const h=canvas.height;
-  const floorStyle=currentStudioStyle();
-  updateStudioLabel(floorStyle);
-  drawParquet(ctx,w,h,floorStyle);
-
-  const scale=(Number(byId('studio-scale')?.value)||74)/100;
-  const shiftY=Number(byId('studio-y')?.value)||0;
-  const rotate=((Number(byId('studio-rotate')?.value)||0)*Math.PI)/180;
-  const cx=w/2;
-  const cy=h*.52+shiftY;
-  const targetW=w*scale;
-
-  ctx.save();
-  ctx.translate(cx,cy);
-  ctx.rotate(rotate);
-  ctx.filter='blur(24px)';
-  ctx.fillStyle='rgba(20,18,14,.24)';
-  ctx.beginPath();
-  ctx.ellipse(0,targetW*.35,targetW*.42,targetW*.12,0,0,Math.PI*2);
-  ctx.fill();
-  ctx.restore();
-  ctx.filter='none';
-
-  if(studioImage){
-    const ratio=studioImage.height/studioImage.width;
-    const targetH=targetW*ratio;
-    ctx.save();
-    ctx.translate(cx,cy);
-    ctx.rotate(rotate);
-    ctx.shadowColor='rgba(22,18,12,.28)';
-    ctx.shadowBlur=28;
-    ctx.shadowOffsetY=18;
-    ctx.drawImage(studioImage,-targetW/2,-targetH/2,targetW,targetH);
-    ctx.restore();
-  }else{
-    drawStudioPlaceholder(ctx,w,h);
-  }
-}
-
-function roundedRect(ctx,x,y,w,h,r){
-  if(ctx.roundRect){
-    ctx.roundRect(x,y,w,h,r);
-    return;
-  }
-  ctx.moveTo(x+r,y);
-  ctx.arcTo(x+w,y,x+w,y+h,r);
-  ctx.arcTo(x+w,y+h,x,y+h,r);
-  ctx.arcTo(x,y+h,x,y,r);
-  ctx.arcTo(x,y,x+w,y,r);
-}
-
-function drawStudioPlaceholder(ctx,w,h){
-  const cx=w/2;
-  const cy=h*.5;
-  ctx.save();
-  ctx.fillStyle='rgba(255,255,255,.78)';
-  ctx.strokeStyle='rgba(0,119,130,.28)';
-  ctx.lineWidth=4;
-  ctx.beginPath();
-  roundedRect(ctx,cx-250,cy-215,500,430,42);
-  ctx.fill();
-  ctx.stroke();
-  ctx.fillStyle='#007782';
-  ctx.font='900 76px -apple-system,BlinkMacSystemFont,Segoe UI,sans-serif';
-  ctx.textAlign='center';
-  ctx.fillText('PH',cx,cy-10);
-  ctx.fillStyle='rgba(21,23,22,.68)';
-  ctx.font='500 34px -apple-system,BlinkMacSystemFont,Segoe UI,sans-serif';
-  ctx.fillText('T-Shirt Bild auswählen',cx,cy+58);
-  ctx.restore();
-}
-
-function randomizeStudio(){
-  studioSeed=Math.floor(Math.random()*10000);
-  const rotate=byId('studio-rotate');
-  const y=byId('studio-y');
-  const scale=byId('studio-scale');
-  if(rotate)rotate.value=Math.round(seededNoise(studioSeed+1)*10-5);
-  if(y)y.value=Math.round(seededNoise(studioSeed+2)*90-35);
-  if(scale)scale.value=Math.round(68+seededNoise(studioSeed+3)*16);
-  renderStudio();
-}
-
-function downloadStudioImage(){
-  const canvas=byId('studio-canvas');
-  if(!canvas)return;
-  const save=url=>{
-    const a=document.createElement('a');
-    a.href=url;
-    a.download='ph-vinted-produktfoto.png';
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    toast('Bild gespeichert');
-    setTimeout(()=>URL.revokeObjectURL(url),1200);
-  };
-  if(canvas.toBlob){
-    canvas.toBlob(blob=>blob&&save(URL.createObjectURL(blob)),'image/png',1);
-  }else{
-    const a=document.createElement('a');
-    a.href=canvas.toDataURL('image/png');
-    a.download='ph-vinted-produktfoto.png';
-    a.click();
-  }
-}
 
 function resetForm(){
   ['size','color','details','keywords'].forEach(id=>byId(id).value='');
@@ -982,5 +639,4 @@ function toast(text){
 });
 window.addEventListener('DOMContentLoaded',()=>{
   init();
-  renderStudio();
 });
