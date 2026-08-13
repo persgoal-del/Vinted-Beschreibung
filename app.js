@@ -1,115 +1,4 @@
 const productListVersion='2026-06-24-tshirt-list-v2';
-
-// 🔥 Firebase-Sync
-// Trage hier deine Firebase-Konfiguration ein. Du findest sie in Firebase:
-// Projekteinstellungen → Allgemein → Deine Apps → Web-App → firebaseConfig
-const firebaseConfig={
-  apiKey:'HIER_EINFÜGEN',
-  authDomain:'HIER_EINFÜGEN',
-  projectId:'HIER_EINFÜGEN',
-  storageBucket:'HIER_EINFÜGEN',
-  messagingSenderId:'HIER_EINFÜGEN',
-  appId:'HIER_EINFÜGEN'
-};
-
-const firebaseDocId='listing-generator-main';
-let db=null;
-let firebaseReady=false;
-let unsubscribeFirebase=null;
-let isApplyingRemote=false;
-let saveTimer=null;
-
-function hasFirebaseConfig(){
-  return firebaseConfig.apiKey&&firebaseConfig.apiKey!=='HIER_EINFÜGEN'&&firebaseConfig.projectId&&firebaseConfig.projectId!=='HIER_EINFÜGEN';
-}
-
-function setSyncStatus(text,type='neutral'){
-  const el=byId('sync-status');
-  if(!el)return;
-  el.textContent=text;
-  el.className=`sync-status ${type}`;
-}
-
-async function initFirebaseSync(){
-  if(!window.firebase){setSyncStatus('Firebase SDK fehlt – lokal gespeichert','warn');return;}
-  if(!hasFirebaseConfig()){setSyncStatus('Firebase Config fehlt – lokal gespeichert','warn');return;}
-  try{
-    if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);
-    db=firebase.firestore();
-    await firebase.auth().signInAnonymously();
-    firebaseReady=true;
-    setSyncStatus('Firebase verbunden – Sync aktiv','ok');
-    listenToCloudData();
-    await saveAllToCloudDebounced(true);
-  }catch(error){
-    console.error('Firebase Fehler:',error);
-    setSyncStatus('Firebase Fehler – lokal gespeichert','error');
-  }
-}
-
-function cloudDoc(){
-  return db.collection('listingGenerator').doc(firebaseDocId);
-}
-
-function getTemplateData(){
-  return {
-    start:byId('template-start')?.value||'',
-    end:byId('template-end')?.value||''
-  };
-}
-
-function applyTemplateData(data={}){
-  if(byId('template-start'))byId('template-start').value=data.start||'';
-  if(byId('template-end'))byId('template-end').value=data.end||'';
-}
-
-function listenToCloudData(){
-  if(!firebaseReady)return;
-  if(unsubscribeFirebase)unsubscribeFirebase();
-  unsubscribeFirebase=cloudDoc().onSnapshot(snapshot=>{
-    if(!snapshot.exists)return;
-    const data=snapshot.data()||{};
-    isApplyingRemote=true;
-    if(Array.isArray(data.products)&&data.products.length){
-      products=data.products.map(normalizeProduct).filter(p=>p.name);
-      localStorage.setItem('ph_listing_products',JSON.stringify(products));
-      localStorage.setItem('ph_listing_products_version',productListVersion);
-      refreshProductSelect(byId('product')?.value);
-      renderProductManager(byId('admin-product')?.value);
-    }
-    if(data.templates){
-      applyTemplateData(data.templates);
-      localStorage.setItem('ph_listing_templates',JSON.stringify(data.templates));
-    }
-    isApplyingRemote=false;
-    onProductChange();
-    setSyncStatus('Synchronisiert','ok');
-  },error=>{
-    console.error('Firebase Snapshot Fehler:',error);
-    setSyncStatus('Sync-Fehler – lokal gespeichert','error');
-  });
-}
-
-async function saveAllToCloudDebounced(immediate=false){
-  if(isApplyingRemote||!firebaseReady)return;
-  clearTimeout(saveTimer);
-  const run=async()=>{
-    try{
-      await cloudDoc().set({
-        productListVersion,
-        products,
-        templates:getTemplateData(),
-        updatedAt:firebase.firestore.FieldValue.serverTimestamp()
-      },{merge:true});
-      setSyncStatus('Gespeichert & synchronisiert','ok');
-    }catch(error){
-      console.error('Firebase Speichern Fehler:',error);
-      setSyncStatus('Cloud-Speichern fehlgeschlagen – lokal gespeichert','error');
-    }
-  };
-  if(immediate)return run();
-  saveTimer=setTimeout(run,450);
-}
 const defaultProducts=[
   {name:'Hose',type:'Hose',theme:['Sommerhose','blau weiß gestreift','Stockholm Style','Old Money Style'],tags:['#hose','#sommerhose','#oldmoneystyle','#stockholmstyle','#gestreift','#sommeroutfit']},
   {name:'Yacht Club Saint Tropez - Weiß mit navyblauem Design',type:'T-Shirt',theme:['Yacht Club','Saint Tropez','Riviera','Sommer Look'],tags:['#tshirt','#yachtclub','#sainttropez','#rivierastyle','#sommeroutfit']},
@@ -153,11 +42,11 @@ const closers=[
 
 const hoseRequired={
   titleBase:'Blau-weiß gestreifte Sommerhose',
-  website:'https://becker-boutique.com/products/elko-loose-fit-gestreift-herren-sommerhose',
+  website:'maisonrivage.eu',
   style:'Stockholm Style / Old Money Look',
   fit:'Baggy Fit',
   fabric:'Der Stoff fällt leicht und dünn aus, was sie perfekt für warme Sommertage macht.',
-  reason:'nur einmal zur Abi-Mottowoche getragen'
+  reason:'nur einmal getragen'
 };
 
 const hoseSizeData={
@@ -174,31 +63,46 @@ const tshirtSizeData={
 };
 
 const hoseOpeners=[
-  'Verkauft wird diese schöne blau-weiß gestreifte Herren-Sommerhose',
+  'Heyy 😊 Ich verkaufe diese blau-weiß gestreifte Sommerhose',
+  'Hey! 👋 Zum Verkauf steht diese schöne blau-weiß gestreifte Herren-Sommerhose',
   'Ich verkaufe diese blau-weiß gestreifte Herren-Sommerhose',
-  'Zum Verkauf steht diese schöne blau-weiß gestreifte Sommerhose',
-  'Angeboten wird diese blau-weiß gestreifte Herren-Sommerhose'
+  'Heyy 😊 Angeboten wird diese lässige blau-weiß gestreifte Sommerhose',
+  'Hey 👋 Ich trenne mich von dieser blau-weiß gestreiften Sommerhose',
+  'Zum Verkauf steht diese blau-weiß gestreifte Sommerhose im Baggy Fit'
 ];
 
 const hoseConditionLines=[
-  'Ich habe sie nur einmal zur Abi-Mottowoche getragen - sie ist daher noch in einem sehr guten, fast neuwertigen Zustand.',
-  'Sie wurde nur einmal zur Abi-Mottowoche getragen und ist deshalb in einem sehr guten, nahezu neuwertigen Zustand.',
-  'Getragen wurde sie lediglich einmal bei der Abi-Mottowoche, daher ist sie noch sehr gepflegt und fast wie neu.',
-  'Die Hose kam nur einmal während der Abi-Mottowoche zum Einsatz und befindet sich daher in einem sehr guten Zustand.'
+  'Sie wurde nur einmal getragen und ist dementsprechend noch in einem sehr guten Zustand.',
+  'Ich habe sie nur einmal getragen - sie ist daher noch in einem sehr guten, fast neuwertigen Zustand.',
+  'Die Hose wurde nur einmal getragen und befindet sich deshalb in einem nahezu neuwertigen Zustand.',
+  'Getragen wurde sie lediglich einmal, daher ist sie noch sehr gepflegt und fast wie neu.',
+  'Sie ist kaum getragen und befindet sich noch in einem sehr guten, gepflegten Zustand.',
+  'Nur einmal getragen, weshalb sie sich noch in einem top Zustand befindet.'
 ];
 
 const hoseSummerLines=[
+  'Die Hose hat einen schönen Baggy Fit und ist perfekt luftig. 🌊',
   'Der Stoff fällt leicht und dünn aus, was sie perfekt für warme Sommertage macht.',
   'Der leichte und dünne Stoff macht sie ideal für Sommer, Urlaub und warme Tage.',
-  'Sie trägt sich angenehm luftig, da der Stoff sehr leicht und dünn ausfällt.',
-  'Durch den dünnen Stoff eignet sich die Hose besonders gut für warme Sommertage.'
+  'Sie trägt sich angenehm luftig - der Stoff ist sehr leicht und dünn.',
+  'Durch den dünnen Stoff und den Baggy Fit eignet sie sich perfekt für warme Sommertage.',
+  'Perfekt luftig durch den lockeren Baggy Fit und den leichten Stoff - ideal für den Sommer.'
 ];
 
 const hoseStyleLines=[
-  'Die dunkel blau-weißen Streifen geben der Hose einen tollen Stockholm Style / Old Money Look.',
-  'Durch die dunkel blau-weißen Streifen wirkt sie clean und passt perfekt zum Stockholm Style / Old Money Look.',
+  'Die blau-weißen Streifen geben der Hose einen tollen Stockholm Style / Old Money Look.',
+  'Durch die blau-weißen Streifen wirkt sie clean und passt perfekt zum Stockholm Style / Old Money Look.',
   'Die blau-weißen Streifen sorgen für einen hochwertigen Old Money Style und einen sommerlichen Stockholm Look.',
-  'Optisch passt sie sehr gut zu einem Stockholm Style, Old Money Style oder sommerlichen Herren-Look.'
+  'Optisch passt sie super zu einem Stockholm Style, Old Money Look oder einem sommerlichen Coastal Outfit.',
+  'Der klassische Streifenprint passt perfekt zum Old Money Style und Stockholm Aesthetic.',
+  'Mit dem blau-weißen Streifen-Design trifft sie genau den Stockholm Style / Old Money Trend.'
+];
+
+const hoseFitpicLines=[
+  '📸 Falls ihr ein Fitpic möchtet, schreibt mir gerne!',
+  '📸 Auf Wunsch schicke ich euch gerne ein Fitpic!',
+  '📸 Schreibt mir, wenn ihr ein Fitpic wollt - kein Problem!',
+  '📸 Bei Interesse am Fitpic einfach kurz melden!'
 ];
 
 const hoseHashtags=[
@@ -249,6 +153,22 @@ const capHashtags=[
 ];
 
 let variant=1;
+let studioImage=null;
+let studioSeed=Math.floor(Date.now()%10000);
+const studioStyles=['realistic-oak','realistic-light','realistic-walnut','realistic-ash'];
+const studioStyleNames={
+  'realistic-oak':'Realistische Eiche',
+  'realistic-light':'Helle Eiche',
+  'realistic-walnut':'Warmer Nussbaum',
+  'realistic-ash':'Neutrale Esche'
+};
+const parquetTexture=new Image();
+let parquetTextureReady=false;
+parquetTexture.onload=()=>{
+  parquetTextureReady=true;
+  renderStudio();
+};
+parquetTexture.src='./assets/realistic-oak-parquet.png';
 
 function pick(arr){return arr[Math.floor(Math.random()*arr.length)]}
 function article(type){return ['Armband','Bundle','Artikel'].includes(type)?'ein':'ein schönes'}
@@ -282,7 +202,6 @@ function loadProducts(){
 function saveProducts(){
   localStorage.setItem('ph_listing_products',JSON.stringify(products));
   localStorage.setItem('ph_listing_products_version',productListVersion);
-  saveAllToCloudDebounced();
 }
 
 function init(){
@@ -290,7 +209,6 @@ function init(){
   loadTemplates();
   renderProductManager();
   onProductChange();
-  initFirebaseSync();
 }
 
 function refreshProductSelect(selected=byId('product')?.value){
@@ -412,23 +330,31 @@ function generateTshirtListing(p){
   const titleName=cleanTshirtTitleName(p.name);
   const titleVariants=[
     `${titleName} T-Shirt | Größe ${size} | Heavy Cotton | Old Money Style`,
-    `${titleName} T-Shirt | Gr. ${size} | 215 GSM | Riviera Style`,
-    `${titleName} T-Shirt | Größe ${size} | Yacht Club Style`,
-    `${titleName} T-Shirt | ${size} | Heavy Cotton | Maritimer Look`
+    `${titleName} T-Shirt | Gr. ${size} | 215 GSM | Stockholm Style`,
+    `${titleName} T-Shirt | Größe ${size} | Old Money Style | Yacht Club Look`,
+    `${titleName} T-Shirt | ${size} | Heavy Cotton | Stockholm / Old Money`,
+    `${titleName} T-Shirt | Größe ${size} | Old Money Style | Riviera Look`,
+    `${titleName} T-Shirt | Gr. ${size} | Stockholm Style | Heavy Cotton`
   ];
-  const title=titleVariants[variant%titleVariants.length];
-  const tags=[...new Set([...p.tags,'#heavycotton','#215gsm','#oldmoneystyle','#sommeroutfit','#herrenmode','#streetwear','#customshirt'])].join(' ');
+  const tIdx=variant%6;
+  const title=titleVariants[tIdx%titleVariants.length];
+  const tags=[...new Set([...p.tags,'#heavycotton','#215gsm','#oldmoneystyle','#stockholmstyle','#sommeroutfit','#herrenmode','#streetwear','#customshirt','#maisonrivage'])].join(' ');
+  const shortName=cleanTshirtTitleName(p.name).replace(/^Maison Rivage\s+/,'');
   const introOptions=[
-    `Ich verkaufe dieses Maison Rivage ${cleanTshirtTitleName(p.name).replace(/^Maison Rivage\s+/,'')} T-Shirt in Größe ${size}.`,
+    `Hey 👋 Ich verkaufe dieses Maison Rivage ${shortName} T-Shirt in Größe ${size}.`,
     `Ich biete hier dieses Maison Rivage T-Shirt in Größe ${size} an.`,
-    `Verkauft wird dieses Maison Rivage ${cleanTshirtTitleName(p.name).replace(/^Maison Rivage\s+/,'')} Shirt in Größe ${size}.`,
-    `Ich verkaufe hier ein Maison Rivage T-Shirt in Größe ${size}.`
+    `Hey! 😊 Verkauft wird dieses Maison Rivage ${shortName} Shirt in Größe ${size}.`,
+    `Ich verkaufe hier ein Maison Rivage T-Shirt in Größe ${size}.`,
+    `Hey 👋 Ich trenne mich von diesem Maison Rivage ${shortName} T-Shirt in Größe ${size}.`,
+    `Heyy 😊 Zum Verkauf steht dieses Maison Rivage ${shortName} T-Shirt in Größe ${size}.`
   ];
   const lookOptions=[
     'Das Shirt hat einen cleanen, sommerlichen Look und passt sehr gut zu Chinos, Shorts oder einer leichten Sommerhose.',
     'Der Look wirkt hochwertig, maritim und lässt sich sehr gut im Sommer kombinieren.',
-    'Vom Stil her passt es gut zu Riviera, Old Money, Streetwear oder einem cleanen Casual-Outfit.',
-    'Es ist ideal für warme Tage und lässt sich einfach mit Shorts, Jeans oder Sommerhose tragen.'
+    'Vom Stil her passt es perfekt zu Riviera, Old Money Style, Streetwear oder einem cleanen Casual-Outfit.',
+    'Es ist ideal für warme Tage und lässt sich einfach mit Shorts, Jeans oder Sommerhose tragen.',
+    'Kombinieren kann man es super mit Chinos, hellen Shorts oder einer lockeren Sommerhose.',
+    'Perfekt für den Stockholm Style oder Old Money Look - kombiniert sich easy zu fast allem.'
   ];
   const materialLine='Material: 100 % Baumwolle, 215 GSM Heavy Cotton - angenehm schwer und hochwertig im Griff.';
   const details=[
@@ -444,13 +370,15 @@ function generateTshirtListing(p){
   const shipping='📦 Versand möglich - in der Regel innerhalb von 24 Stunden.';
   const contact='Bei Fragen oder Interesse einfach melden, ich antworte schnell! 😊';
   const layouts=[
-    ['Hallo! 👋','',introOptions[variant%introOptions.length],lookOptions[variant%lookOptions.length],'',`Farbe / Design: ${color}.`,materialLine,'Marke: Maison Rivage.','Selbst bedruckt.','','Details:',details,'',shipping,'',contact,'','Viele Grüße','',tags],
-    ['Hallo! 👋','',introOptions[variant%introOptions.length],'',`Die wichtigsten Details: Maison Rivage, Größe ${size}, Länge ${measure.length}, Breite ${measure.width}.`,`${color}. ${materialLine} Selbst bedruckt.`,'',lookOptions[variant%lookOptions.length],'',shipping,contact,'','Viele Grüße','',tags],
-    ['Hallo! 👋','',introOptions[variant%introOptions.length],lookOptions[variant%lookOptions.length],'','Maße & Material:','Marke: Maison Rivage',`Größe: ${size}`,`Länge: ${measure.length}`,`Breite: ${measure.width}`,`Farbe / Design: ${color}`,'100 % Baumwolle','215 GSM Heavy Cotton','Selbst bedruckt','',shipping,'',contact,'','Viele Grüße','',tags],
-    ['Hallo! 👋','',`${introOptions[variant%introOptions.length]} ${lookOptions[variant%lookOptions.length]}`,'',`Details: Maison Rivage, Größe ${size}, Länge ${measure.length}, Breite ${measure.width}, ${color}.`,`${materialLine} Das Shirt ist selbst bedruckt.`,'',shipping,'',contact,'','Viele Grüße','',tags]
+    [introOptions[tIdx%introOptions.length],'',`Zum T-Shirt:`,`Größe: ${size}`,`Länge: ${measure.length}`,`Breite: ${measure.width}`,'Material: 100 % Baumwolle','215 GSM Heavy Cotton','Regular Fit','Selbst bedruckt','',lookOptions[tIdx%lookOptions.length],'',`📦 ${shipping}`,`Bei Fragen oder Interesse gerne melden 😊`,'',tags],
+    [introOptions[tIdx%introOptions.length],lookOptions[tIdx%lookOptions.length],'',`Farbe / Design: ${color}.`,materialLine,'Marke: Maison Rivage.','Selbst bedruckt.','','Details:',details,'',shipping,'',contact,'',tags],
+    [introOptions[tIdx%introOptions.length],'',`Die wichtigsten Details:`,`Größe ${size} | Länge ${measure.length} | Breite ${measure.width}`,`${color} | ${capRequired.material} | 215 GSM Heavy Cotton`,'Selbst bedruckt','',lookOptions[tIdx%lookOptions.length],'',`📦 ${shipping} ${contact}`,'',tags],
+    [introOptions[tIdx%introOptions.length],lookOptions[tIdx%lookOptions.length],'','Maße & Material:','Marke: Maison Rivage',`Größe: ${size}`,`Länge: ${measure.length}`,`Breite: ${measure.width}`,`Farbe / Design: ${color}`,'100 % Baumwolle','215 GSM Heavy Cotton','Selbst bedruckt','',`📦 ${shipping}`,'',contact,'',tags],
+    [`${introOptions[tIdx%introOptions.length]} ${lookOptions[tIdx%lookOptions.length]}`,'',`Details: Maison Rivage, Größe ${size}, Länge ${measure.length}, Breite ${measure.width}, ${color}.`,`${materialLine} Das Shirt ist selbst bedruckt.`,'',`📦 ${shipping}`,'',contact,'',tags],
+    [introOptions[tIdx%introOptions.length],'',lookOptions[tIdx%lookOptions.length],'',`Zum Shirt: Größe ${size}, Länge ${measure.length}, Breite ${measure.width}.`,`Farbe / Design: ${color}.`,materialLine,'Selbst bedruckt.','',`📦 ${shipping} ${contact}`,'',tags]
   ];
   byId('title').value=title;
-  byId('description').value=layouts[variant%layouts.length].join('\n');
+  byId('description').value=layouts[tIdx%layouts.length].join('\n').replace(/\n{3,}/g,'\n\n').trim();
   byId('variant-label').textContent=`T-Shirt Variante ${variant}`;
 }
 
@@ -459,76 +387,98 @@ function generateHoseListing(p){
   const measure=hoseSizeData[size]||hoseSizeData.M;
   const titleVariants=[
     `${hoseRequired.titleBase} | Größe ${size} | Baggy Fit | Old Money Style`,
-    `${hoseRequired.titleBase} | Gr. ${size} | Stockholm Style | Sommerhose`,
-    `${hoseRequired.titleBase} | Größe ${size} | Loose Fit Pants`,
-    `${hoseRequired.titleBase} | ${size} | Baggy Fit | Stockholm / Old Money`
+    `${hoseRequired.titleBase} | Gr. ${size} | Baggy Fit | Stockholm Style`,
+    `${hoseRequired.titleBase} | Größe ${size} | Baggy Fit | Stockholm / Old Money`,
+    `${hoseRequired.titleBase} | ${size} | Baggy Fit | Old Money Sommerhose`,
+    `${hoseRequired.titleBase} Baggy Fit | Größe ${size} | Stockholm Style`,
+    `${hoseRequired.titleBase} | ${size} | Baggy Fit | Coastal Old Money Look`
   ];
   const title=titleVariants[variant%titleVariants.length];
   const hashtags=hoseHashtags.join(' ');
-  const intro=`${hoseOpeners[variant%hoseOpeners.length]} in Größe ${size}. ${hoseConditionLines[variant%hoseConditionLines.length]}`;
-  const material=`${hoseSummerLines[variant%hoseSummerLines.length]} ${hoseStyleLines[variant%hoseStyleLines.length]}`;
+  const vIdx=variant%6;
+  const intro=`${hoseOpeners[vIdx%hoseOpeners.length]} in Größe ${size}. ${hoseConditionLines[vIdx%hoseConditionLines.length]}`;
+  const summerLine=hoseSummerLines[vIdx%hoseSummerLines.length];
+  const styleLine=hoseStyleLines[vIdx%hoseStyleLines.length];
+  const fitpic=hoseFitpicLines[vIdx%hoseFitpicLines.length];
   const measureBlock=[
-    `- Größe: ${size}`,
-    `- Länge: ${measure.length}`,
-    `- Bundweite: ${measure.waist}`,
-    `- ${measure.compare}`
+    `* Größe: ${size}`,
+    `* Länge: ${measure.length}`,
+    `* Bundweite: ${measure.waist}`,
+    `* Baggy Fit`
   ].join('\n');
-  const linkBlock=`Gekauft wurde sie bei Becker Boutique:\n${hoseRequired.website}`;
-  const shipping='📦 Versand erfolgt in der Regel innerhalb von 24 Stunden.';
-  const contact='Bei Interesse oder Fragen einfach melden - ich freue mich! 😊';
+  const compareNote=`Zum Vergleich: ${measure.compare}.`;
+  const linkBlock=`Gekauft wurde sie hier: ${hoseRequired.website}`;
+  const shipping='📦 Der Versand erfolgt meist innerhalb von 24 Stunden.';
+  const contact='Bei Fragen oder Interesse gerne schreiben 😊';
   const layouts=[
     [
-      'Hallo! 👋','',
       intro,'',
-      material,'',
-      'Maße:',
+      summerLine,'',
       measureBlock,'',
+      compareNote,'',
+      fitpic,'',
       linkBlock,'',
       shipping,'',
-      contact,'',
-      'Viele Grüße','',
       hashtags
     ],
     [
-      'Hallo! 👋','',
       intro,'',
-      'Die wichtigsten Daten auf einen Blick:',
-      `Größe ${size} | Länge ${measure.length} | Bundweite ${measure.waist}`,
-      measure.compare,'',
-      material,'',
+      `${summerLine} ${styleLine}`,'',
+      measureBlock,'',
+      compareNote,'',
+      fitpic,'',
       linkBlock,'',
       `${shipping} ${contact}`,'',
-      'Viele Grüße','',
       hashtags
     ],
     [
-      'Hallo! 👋','',
       intro,'',
+      styleLine,'',
+      summerLine,'',
+      '',
+      measureBlock,'',
+      compareNote,'',
+      fitpic,'',
       linkBlock,'',
-      material,'',
-      'Zur Passform / Maße:',
-      `Größe: ${size}`,
-      `Länge: ${measure.length}`,
-      `Bundweite: ${measure.waist}`,
-      measure.compare,'',
       shipping,
       contact,'',
-      'Viele Grüße','',
       hashtags
     ],
     [
-      'Hallo! 👋','',
-      `${intro} Besonders schön ist der leichte ${hoseRequired.fit}, der lässig sitzt und trotzdem clean wirkt.`,'',
-      material,'',
-      `Maße & Vergleich: Größe ${size}, Länge ${measure.length}, Bundweite ${measure.waist}. ${measure.compare}.`,'',
+      intro,'',
+      `${summerLine} ${styleLine}`,'',
+      `Maße: Größe ${size}, Länge ${measure.length}, Bundweite ${measure.waist} (Baggy Fit).`,
+      compareNote,'',
+      fitpic,'',
       linkBlock,'',
       shipping,'',
       contact,'',
-      'Viele Grüße','',
+      hashtags
+    ],
+    [
+      intro,'',
+      summerLine,
+      styleLine,'',
+      measureBlock,'',
+      compareNote,'',
+      fitpic,'',
+      linkBlock,'',
+      shipping,'',
+      hashtags
+    ],
+    [
+      intro,'',
+      `${styleLine} ${summerLine}`,'',
+      '',
+      measureBlock,'',
+      compareNote,'',
+      fitpic,'',
+      linkBlock,'',
+      `${shipping} ${contact}`,'',
       hashtags
     ]
   ];
-  const text=layouts[variant%layouts.length].join('\n');
+  const text=layouts[vIdx%layouts.length].join('\n').replace(/\n{3,}/g,'\n\n').trim();
   byId('title').value=title;
   byId('description').value=text;
   byId('variant-label').textContent=`Hose Variante ${variant}`;
@@ -539,14 +489,17 @@ function generateCapListing(p){
   const measure=tshirtSizeData[size]||tshirtSizeData.L;
   const titleVariants=[
     `${capRequired.titleBase} | Größe ${size} | Heavy Cotton | Old Money Style`,
-    `${capRequired.titleBase} | Gr. ${size} | 215 GSM | Riviera Style`,
-    `${capRequired.titleBase} | Größe ${size} | Yacht Club Look`,
-    `${capRequired.titleBase} | ${size} | Maison Rivage | Heavy Cotton`
+    `${capRequired.titleBase} | Gr. ${size} | 215 GSM | Stockholm Style`,
+    `${capRequired.titleBase} | Größe ${size} | Old Money Style | Yacht Club Look`,
+    `${capRequired.titleBase} | ${size} | Stockholm Style | Heavy Cotton`,
+    `${capRequired.titleBase} | Größe ${size} | Old Money Style | Riviera Look`,
+    `${capRequired.titleBase} | Gr. ${size} | Stockholm / Old Money Style`
   ];
-  const title=titleVariants[variant%titleVariants.length];
+  const cIdx=variant%6;
+  const title=titleVariants[cIdx%titleVariants.length];
   const hashtags=capHashtags.join(' ');
-  const intro=`${capOpeners[variant%capOpeners.length]} - perfekt für den Sommer, sowohl vom Fit als auch vom Look her.`;
-  const styleLine=`${capLookLines[variant%capLookLines.length]} ${capFitLines[variant%capFitLines.length]}`;
+  const intro=`${capOpeners[cIdx%capOpeners.length]} - perfekt für den Sommer, sowohl vom Fit als auch vom Look her.`;
+  const styleLine=`${capLookLines[cIdx%capLookLines.length]} ${capFitLines[cIdx%capFitLines.length]}`;
   const detailBlock=[
     `- Größe: ${size}`,
     `- Länge: ${measure.length}`,
@@ -560,30 +513,25 @@ function generateCapListing(p){
   const contact='Bei Fragen oder Interesse einfach melden, ich antworte schnell! 😊';
   const layouts=[
     [
-      'Hallo! 👋','',
       intro,'',
       styleLine,'',
       'Details:',
       detailBlock,'',
-      shipping,'',
+      `📦 ${shipping}`,'',
       contact,'',
-      'Viele Grüße','',
       hashtags
     ],
     [
-      'Hallo! 👋','',
       intro,'',
       'Die wichtigsten Details:',
       `Größe ${size} | Länge ${measure.length} | Breite ${measure.width}`,
       `${capRequired.color}, ${capRequired.material}, ${capRequired.weight}`,
       capRequired.print,'',
       styleLine,'',
-      `${shipping} ${contact}`,'',
-      'Viele Grüße','',
+      `📦 ${shipping} ${contact}`,'',
       hashtags
     ],
     [
-      'Hallo! 👋','',
       `${intro} ${styleLine}`,'',
       'Maße & Material:',
       `Größe: ${size}`,
@@ -593,25 +541,43 @@ function generateCapListing(p){
       `Material: ${capRequired.material}`,
       `${capRequired.weight} - angenehm schwer und hochwertig im Griff`,
       capRequired.print,'',
-      shipping,
+      `📦 ${shipping}`,
       contact,'',
-      'Viele Grüße','',
       hashtags
     ],
     [
-      'Hallo! 👋','',
       `Verkaufe ein weißes Maison Rivage Shirt in Größe ${size} mit Cap d'Antibes / Yacht Club Design.`,'',
       styleLine,
       `Der Stoff besteht aus ${capRequired.material}; mit ${capRequired.weight} fühlt sich das Shirt angenehm schwer und hochwertig an.`,'',
       `Details: Größe ${size}, Länge ${measure.length}, Breite ${measure.width}, Farbe ${tshirtColorForProduct(p.name)}, ${capRequired.print}.`,'',
-      shipping,'',
+      `📦 ${shipping}`,'',
       contact,'',
-      'Viele Grüße','',
+      hashtags
+    ],
+    [
+      intro,'',
+      `Zum Shirt:`,
+      `Größe: ${size}`,
+      `Länge: ${measure.length}`,
+      `Breite: ${measure.width}`,
+      `Farbe: ${tshirtColorForProduct(p.name)}`,
+      '100 % Baumwolle | 215 GSM Heavy Cotton',
+      capRequired.print,'',
+      styleLine,'',
+      `📦 ${shipping} ${contact}`,'',
+      hashtags
+    ],
+    [
+      `${intro} ${styleLine}`,'',
+      `Details: Maison Rivage, Größe ${size}, Länge ${measure.length}, Breite ${measure.width}.`,
+      `Farbe: ${tshirtColorForProduct(p.name)}. ${capRequired.material}, ${capRequired.weight}. ${capRequired.print}.`,'',
+      `📦 ${shipping}`,'',
+      contact,'',
       hashtags
     ]
   ];
   byId('title').value=title;
-  byId('description').value=layouts[variant%layouts.length].join('\n');
+  byId('description').value=layouts[cIdx%layouts.length].join('\n').replace(/\n{3,}/g,'\n\n').trim();
   byId('variant-label').textContent=`T-Shirt Variante ${variant}`;
 }
 
@@ -634,8 +600,10 @@ function copyField(id){copyText(byId(id).value)}
 function copyAll(){copyText(`${byId('title').value}\n\n${byId('description').value}`)}
 
 function saveTemplates(){
-  localStorage.setItem('ph_listing_templates',JSON.stringify(getTemplateData()));
-  saveAllToCloudDebounced();
+  localStorage.setItem('ph_listing_templates',JSON.stringify({
+    start:byId('template-start').value,
+    end:byId('template-end').value
+  }));
   toast('Muster gespeichert');
   generateListing(true);
 }
@@ -728,6 +696,272 @@ function resetProducts(){
   toast('Standardliste wiederhergestellt');
 }
 
+function seededNoise(seed){
+  const x=Math.sin(seed*12.9898)*43758.5453;
+  return x-Math.floor(x);
+}
+
+function woodPalette(style){
+  const palettes={
+    oak:{base:'#d8bb8a',light:'#edd6a8',dark:'#a97842',line:'rgba(94,58,28,.25)'},
+    walnut:{base:'#a46b3f',light:'#c7925d',dark:'#694123',line:'rgba(54,31,15,.32)'},
+    ash:{base:'#c7b9a2',light:'#e2d7c5',dark:'#8d806c',line:'rgba(70,63,53,.24)'}
+  };
+  return palettes[style]||palettes.oak;
+}
+
+function shadeWood(hex,amount){
+  const n=parseInt(hex.slice(1),16);
+  const r=Math.max(0,Math.min(255,((n>>16)&255)+amount*255));
+  const g=Math.max(0,Math.min(255,((n>>8)&255)+amount*255));
+  const b=Math.max(0,Math.min(255,(n&255)+amount*255));
+  return `rgb(${Math.round(r)},${Math.round(g)},${Math.round(b)})`;
+}
+
+function currentStudioStyle(){
+  return studioStyles[Math.abs(studioSeed)%studioStyles.length];
+}
+
+function updateStudioLabel(style=currentStudioStyle()){
+  const label=byId('studio-bg-label');
+  if(label)label.textContent=studioStyleNames[style]||'Automatisch';
+}
+
+function drawParquet(ctx,w,h,style='realistic-oak'){
+  if(style.startsWith('realistic')&&parquetTextureReady){
+    ctx.save();
+    ctx.filter=realisticFloorFilter(style);
+    drawImageCover(ctx,parquetTexture,0,0,w,h,studioSeed);
+    ctx.restore();
+    polishRealisticFloor(ctx,w,h,style);
+    return;
+  }
+
+  const p=woodPalette(style);
+  const bg=ctx.createLinearGradient(0,0,w,h);
+  bg.addColorStop(0,p.light);
+  bg.addColorStop(.45,p.base);
+  bg.addColorStop(1,p.dark);
+  ctx.fillStyle=bg;
+  ctx.fillRect(0,0,w,h);
+
+  const plankH=Math.max(118,Math.round(h/9));
+  const plankW=Math.max(310,Math.round(w/3.25));
+  ctx.lineWidth=3;
+  for(let y=-plankH;y<h+plankH;y+=plankH){
+    const row=Math.floor((y+plankH)/plankH);
+    const offset=row%2?-plankW/2:0;
+    for(let x=-plankW;x<w+plankW;x+=plankW){
+      const nx=x+offset;
+      const noise=seededNoise((nx+31)*.017+(y+studioSeed)*.011);
+      const grad=ctx.createLinearGradient(nx,y,nx+plankW,y+plankH);
+      grad.addColorStop(0,shadeWood(p.light,noise*.08));
+      grad.addColorStop(.52,shadeWood(p.base,noise*.14-.04));
+      grad.addColorStop(1,shadeWood(p.dark,noise*.08));
+      ctx.fillStyle=grad;
+      ctx.fillRect(nx,y,plankW,plankH);
+      ctx.strokeStyle=p.line;
+      ctx.strokeRect(nx,y,plankW,plankH);
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(nx+10,y+10,plankW-20,plankH-20);
+      ctx.clip();
+      for(let i=0;i<9;i++){
+        const yy=y+18+i*(plankH/9)+seededNoise(nx+y+i+studioSeed)*9;
+        ctx.beginPath();
+        ctx.moveTo(nx+14,yy);
+        ctx.bezierCurveTo(nx+plankW*.35,yy-12,nx+plankW*.62,yy+14,nx+plankW-14,yy-4);
+        ctx.strokeStyle=`rgba(88,54,28,${.09+noise*.06})`;
+        ctx.lineWidth=1.2;
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+  }
+
+  const gloss=ctx.createRadialGradient(w*.34,h*.08,20,w*.34,h*.08,w*.82);
+  gloss.addColorStop(0,'rgba(255,255,255,.28)');
+  gloss.addColorStop(.58,'rgba(255,255,255,.08)');
+  gloss.addColorStop(1,'rgba(255,255,255,0)');
+  ctx.fillStyle=gloss;
+  ctx.fillRect(0,0,w,h);
+}
+
+function drawImageCover(ctx,img,x,y,w,h,seed=0){
+  const scale=Math.max(w/img.width,h/img.height);
+  const sw=w/scale;
+  const sh=h/scale;
+  const maxX=Math.max(0,img.width-sw);
+  const maxY=Math.max(0,img.height-sh);
+  const sx=maxX*(.28+seededNoise(seed+19)*.44);
+  const sy=maxY*(.34+seededNoise(seed+37)*.32);
+  ctx.drawImage(img,sx,sy,sw,sh,x,y,w,h);
+}
+
+function realisticFloorFilter(style){
+  const filters={
+    'realistic-oak':'saturate(1.06) contrast(1.04) brightness(1.02)',
+    'realistic-light':'saturate(.96) contrast(1.02) brightness(1.14)',
+    'realistic-walnut':'sepia(.28) saturate(1.22) contrast(1.08) brightness(.9)',
+    'realistic-ash':'saturate(.64) contrast(1.06) brightness(1.04)'
+  };
+  return filters[style]||filters['realistic-oak'];
+}
+
+function polishRealisticFloor(ctx,w,h,style='realistic-oak'){
+  const overlays={
+    'realistic-oak':['rgba(255,232,190,.18)','rgba(141,83,30,.12)','rgba(76,48,22,.18)'],
+    'realistic-light':['rgba(255,246,222,.24)','rgba(196,142,75,.08)','rgba(84,58,33,.13)'],
+    'realistic-walnut':['rgba(174,100,45,.16)','rgba(75,38,16,.22)','rgba(42,24,12,.25)'],
+    'realistic-ash':['rgba(226,222,214,.22)','rgba(110,103,91,.12)','rgba(56,52,46,.17)']
+  };
+  const tone=overlays[style]||overlays['realistic-oak'];
+  const warmth=ctx.createLinearGradient(0,0,w,h);
+  warmth.addColorStop(0,tone[0]);
+  warmth.addColorStop(.55,'rgba(255,255,255,.02)');
+  warmth.addColorStop(1,tone[1]);
+  ctx.fillStyle=warmth;
+  ctx.fillRect(0,0,w,h);
+
+  const vignette=ctx.createRadialGradient(w*.5,h*.44,w*.18,w*.5,h*.44,w*.76);
+  vignette.addColorStop(0,'rgba(255,255,255,.08)');
+  vignette.addColorStop(.58,'rgba(255,255,255,0)');
+  vignette.addColorStop(1,tone[2]);
+  ctx.fillStyle=vignette;
+  ctx.fillRect(0,0,w,h);
+}
+
+function handleStudioUpload(event){
+  const file=event.target.files?.[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=()=>{
+    const img=new Image();
+    img.onload=()=>{
+      studioImage=img;
+      renderStudio();
+      toast('Bild geladen');
+    };
+    img.src=reader.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function renderStudio(){
+  const canvas=byId('studio-canvas');
+  if(!canvas)return;
+  const format=byId('studio-format')?.value||'square';
+  canvas.width=1080;
+  canvas.height=format==='portrait'?1350:1080;
+  const ctx=canvas.getContext('2d');
+  const w=canvas.width;
+  const h=canvas.height;
+  const floorStyle=currentStudioStyle();
+  updateStudioLabel(floorStyle);
+  drawParquet(ctx,w,h,floorStyle);
+
+  const scale=(Number(byId('studio-scale')?.value)||74)/100;
+  const shiftY=Number(byId('studio-y')?.value)||0;
+  const rotate=((Number(byId('studio-rotate')?.value)||0)*Math.PI)/180;
+  const cx=w/2;
+  const cy=h*.52+shiftY;
+  const targetW=w*scale;
+
+  ctx.save();
+  ctx.translate(cx,cy);
+  ctx.rotate(rotate);
+  ctx.filter='blur(24px)';
+  ctx.fillStyle='rgba(20,18,14,.24)';
+  ctx.beginPath();
+  ctx.ellipse(0,targetW*.35,targetW*.42,targetW*.12,0,0,Math.PI*2);
+  ctx.fill();
+  ctx.restore();
+  ctx.filter='none';
+
+  if(studioImage){
+    const ratio=studioImage.height/studioImage.width;
+    const targetH=targetW*ratio;
+    ctx.save();
+    ctx.translate(cx,cy);
+    ctx.rotate(rotate);
+    ctx.shadowColor='rgba(22,18,12,.28)';
+    ctx.shadowBlur=28;
+    ctx.shadowOffsetY=18;
+    ctx.drawImage(studioImage,-targetW/2,-targetH/2,targetW,targetH);
+    ctx.restore();
+  }else{
+    drawStudioPlaceholder(ctx,w,h);
+  }
+}
+
+function roundedRect(ctx,x,y,w,h,r){
+  if(ctx.roundRect){
+    ctx.roundRect(x,y,w,h,r);
+    return;
+  }
+  ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r);
+  ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r);
+  ctx.arcTo(x,y,x+w,y,r);
+}
+
+function drawStudioPlaceholder(ctx,w,h){
+  const cx=w/2;
+  const cy=h*.5;
+  ctx.save();
+  ctx.fillStyle='rgba(255,255,255,.78)';
+  ctx.strokeStyle='rgba(0,119,130,.28)';
+  ctx.lineWidth=4;
+  ctx.beginPath();
+  roundedRect(ctx,cx-250,cy-215,500,430,42);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle='#007782';
+  ctx.font='900 76px -apple-system,BlinkMacSystemFont,Segoe UI,sans-serif';
+  ctx.textAlign='center';
+  ctx.fillText('PH',cx,cy-10);
+  ctx.fillStyle='rgba(21,23,22,.68)';
+  ctx.font='500 34px -apple-system,BlinkMacSystemFont,Segoe UI,sans-serif';
+  ctx.fillText('T-Shirt Bild auswählen',cx,cy+58);
+  ctx.restore();
+}
+
+function randomizeStudio(){
+  studioSeed=Math.floor(Math.random()*10000);
+  const rotate=byId('studio-rotate');
+  const y=byId('studio-y');
+  const scale=byId('studio-scale');
+  if(rotate)rotate.value=Math.round(seededNoise(studioSeed+1)*10-5);
+  if(y)y.value=Math.round(seededNoise(studioSeed+2)*90-35);
+  if(scale)scale.value=Math.round(68+seededNoise(studioSeed+3)*16);
+  renderStudio();
+}
+
+function downloadStudioImage(){
+  const canvas=byId('studio-canvas');
+  if(!canvas)return;
+  const save=url=>{
+    const a=document.createElement('a');
+    a.href=url;
+    a.download='ph-vinted-produktfoto.png';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    toast('Bild gespeichert');
+    setTimeout(()=>URL.revokeObjectURL(url),1200);
+  };
+  if(canvas.toBlob){
+    canvas.toBlob(blob=>blob&&save(URL.createObjectURL(blob)),'image/png',1);
+  }else{
+    const a=document.createElement('a');
+    a.href=canvas.toDataURL('image/png');
+    a.download='ph-vinted-produktfoto.png';
+    a.click();
+  }
+}
+
 function resetForm(){
   ['size','color','details','keywords'].forEach(id=>byId(id).value='');
   byId('condition').value='Neu und ungetragen';
@@ -746,4 +980,7 @@ function toast(text){
 ['size','color','condition','style','details','keywords'].forEach(id=>{
   window.addEventListener('DOMContentLoaded',()=>byId(id).addEventListener('input',()=>generateListing()));
 });
-window.addEventListener('DOMContentLoaded',init);
+window.addEventListener('DOMContentLoaded',()=>{
+  init();
+  renderStudio();
+});
